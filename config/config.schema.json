@@ -82,6 +82,26 @@
           "minLength": 1
         }
       }
+    },
+    "notifications": {
+      "type": "object",
+      "properties": {
+        "telegram": {
+          "type": "object",
+          "required": ["token", "chat_id"],
+          "properties": {
+            "token": {
+              "type": "string",
+              "minLength": 43,
+              "maxLength": 45
+            },
+            "chat_id": {
+              "type": "string",
+              "minLength": 3
+            }
+          }
+        }
+      }
     }
   }
 }

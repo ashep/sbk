@@ -21,8 +21,10 @@ func main() {
 
 	ctx, ctxCancel := context.WithCancel(context.Background())
 
-	rb := rdiffbackup.New(cfg.Files.Verbosity)
-	rb.Backup(ctx, cfg.Files.Sources, cfg.Files.Exclude, cfg.Files.Destination)
+	if len(cfg.Files.Sources) != 0 {
+		rb := rdiffbackup.New(cfg.Files.Verbosity)
+		rb.BackupMany(ctx, cfg.Files.Sources, cfg.Files.Exclude, cfg.Files.Destination, nil)
+	}
 
 	ctxCancel()
 }

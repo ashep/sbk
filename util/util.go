@@ -10,15 +10,15 @@ import (
 	"sync"
 )
 
-func StreamCommand(ctx context.Context, out, errs io.Writer, name string, args []string) error {
+func StreamCommand(ctx context.Context, outW, errW io.Writer, name string, args []string) error {
 	c := exec.CommandContext(ctx, name, args...)
 
-	cmdStdout, err := c.StdoutPipe()
+	stdout, err := c.StdoutPipe()
 	if err != nil {
 		return err
 	}
 
-	cmdStderr, err := c.StderrPipe()
+	stderr, err := c.StderrPipe()
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func StreamCommand(ctx context.Context, out, errs io.Writer, name string, args [
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 
-	go Stream(ctx, &wg, out, errs, cmdStdout, cmdStderr)
+	go Stream(ctx, &wg, outW, errW, stdout, stderr)
 
 	err = c.Wait()
 	wg.Wait()
@@ -38,7 +38,8 @@ func StreamCommand(ctx context.Context, out, errs io.Writer, name string, args [
 	return err
 }
 
-func Stream(ctx context.Context, wg *sync.WaitGroup, out, errsOut io.Writer, in, errsIn io.Reader) {
+// Stream reads from inR, errR and writes read bytes to outW, errW correspondingly
+func Stream(ctx context.Context, wg *sync.WaitGroup, outW, errW io.Writer, inR, errR io.Reader) {
 	buf := make([]byte, 64<<10) // 64 Kb
 	defer wg.Done()
 
@@ -47,7 +48,7 @@ func Stream(ctx context.Context, wg *sync.WaitGroup, out, errsOut io.Writer, in,
 		case <-ctx.Done():
 			return
 		default:
-			err := flush(in, out, buf)
+			err := flush(inR, outW, buf)
 			if err != nil {
 				if !(err == io.EOF || errors.Is(err, fs.ErrClosed)) {
 					log.Print(err)
@@ -55,7 +56,7 @@ func Stream(ctx context.Context, wg *sync.WaitGroup, out, errsOut io.Writer, in,
 				return
 			}
 
-			err = flush(errsIn, errsOut, buf)
+			err = flush(errR, errW, buf)
 			if err != nil {
 				if !(err == io.EOF || errors.Is(err, fs.ErrClosed)) {
 					log.Print(err)

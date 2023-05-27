@@ -1,9 +1,9 @@
 package telegram
 
-type Telegram struct {
+type Client struct {
 	Token string
 }
 
-func New(token string) *Telegram {
-	return &Telegram{Token: token}
+func New(token string) *Client {
+	return &Client{Token: token}
 }

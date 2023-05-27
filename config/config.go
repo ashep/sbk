@@ -34,8 +34,19 @@ type MySQL struct {
 	Destination string     `yaml:"destination" json:"destination"`
 }
 
+type Telegram struct {
+	Token  string `yaml:"token" json:"token"`
+	ChatId string `yaml:"chat_id" json:"chat_id"`
+}
+
+type Notifications struct {
+	Telegram Telegram `yaml:"telegram" json:"telegram"`
+}
+
 type Config struct {
-	Files Files `yaml:"files" json:"files"`
+	Files         Files         `yaml:"files" json:"files"`
+	MySQL         MySQL         `yaml:"mysql" json:"mysql"`
+	Notifications Notifications `yaml:"notifications" json:"notifications"`
 }
 
 func ParseFromFile(name string) (Config, error) {
