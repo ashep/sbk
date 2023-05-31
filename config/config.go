@@ -2,6 +2,7 @@ package config
 
 import (
 	_ "embed"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -35,18 +36,19 @@ type MySQL struct {
 }
 
 type Telegram struct {
-	Token  string `yaml:"token" json:"token"`
-	ChatId string `yaml:"chat_id" json:"chat_id"`
+	Token  string `yaml:"token,omitempty" json:"token,omitempty"`
+	ChatId string `yaml:"chat_id,omitempty" json:"chat_id,omitempty"`
 }
 
 type Notifications struct {
-	Telegram Telegram `yaml:"telegram" json:"telegram"`
+	Telegram *Telegram `yaml:"telegram,omitempty" json:"telegram,omitempty"`
 }
 
 type Config struct {
 	Files         Files         `yaml:"files" json:"files"`
 	MySQL         MySQL         `yaml:"mysql" json:"mysql"`
-	Notifications Notifications `yaml:"notifications" json:"notifications"`
+	LogDir        string        `yaml:"logDir,omitempty" json:"logDir,omitempty"`
+	Notifications Notifications `yaml:"notifications,omitempty" json:"notifications,omitempty"`
 }
 
 func ParseFromFile(name string) (Config, error) {
@@ -65,9 +67,16 @@ func ParseFromFile(name string) (Config, error) {
 	}}
 	err = yaml.Unmarshal(b, &c)
 
+	cJSON, err := json.Marshal(c)
+	if err != nil {
+		return Config{}, err
+	}
+
+	fmt.Printf("%s\n", cJSON)
+
 	res, err := gojsonschema.Validate(
 		gojsonschema.NewStringLoader(schema),
-		gojsonschema.NewGoLoader(c),
+		gojsonschema.NewBytesLoader(cJSON),
 	)
 	if err != nil {
 		return Config{}, fmt.Errorf("failed to validate %s: %s", name, err)

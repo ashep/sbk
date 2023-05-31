@@ -69,11 +69,13 @@ func Stream(ctx context.Context, wg *sync.WaitGroup, outW, errW io.Writer, inR, 
 }
 
 func flush(r io.Reader, w io.Writer, buf []byte) error {
-	if _, err := r.Read(buf); err != nil {
+	n, err := r.Read(buf)
+	if err != nil {
 		return err
 	}
 
-	if _, err := w.Write(buf); err != nil {
+	_, err = w.Write(buf[:n])
+	if err != nil {
 		return err
 	}
 

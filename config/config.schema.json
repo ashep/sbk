@@ -83,6 +83,12 @@
         }
       }
     },
+    "logDir": {
+      "description": "Path to the log directory",
+      "type": "string",
+      "minLength": 1,
+      "default": "./log"
+    },
     "notifications": {
       "type": "object",
       "properties": {
