@@ -13,6 +13,10 @@ and [config.sample.yaml](config.sample.yaml) as a reference.
 
 ## Changelog
 
+### 23.06.09.1
+
+Fix Telegram token length validation.
+
 ### 23.06.09
 
 Initial release.

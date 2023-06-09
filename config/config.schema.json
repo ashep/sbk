@@ -102,8 +102,8 @@
           "properties": {
             "token": {
               "type": "string",
-              "minLength": 43,
-              "maxLength": 45
+              "minLength": 1,
+              "maxLength": 50
             },
             "chat_id": {
               "type": "string",
