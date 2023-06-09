@@ -23,8 +23,6 @@ func New(token string) *Client {
 func (c *Client) SendMessage(chatId, msg string) error {
 	payload := fmt.Sprintf(`{"chat_id":%q,"text":%q,"parse_mode":"markdown"}`, chatId, msg)
 
-	fmt.Printf("%s\n", payload)
-
 	req, err := http.NewRequest(
 		http.MethodPost,
 		fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", c.Token),

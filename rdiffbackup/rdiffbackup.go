@@ -32,22 +32,32 @@ func (r *RdiffBackup) BatchBackup(ctx context.Context, sources, exclude []string
 
 	reportOk := ""
 	reportErr := ""
+	host, _ := os.Hostname()
 
 	for _, src := range sources {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+
+		src = util.AbsPath(src)
 		dst := target + "/" + src
 		now := time.Now()
 
 		if err := r.Backup(ctx, src, dst, logPath, exclude); err != nil {
-			log.Printf("Backup failed: src: %s; dst: %s; err: %s", src, dst, err)
+			log.Printf("Files backup failed: src: %s; dst: %s; err: %s", src, dst, err)
 
 			if reportErr != "" {
 				reportErr += "\n\n"
 			}
-			reportErr += icon.Error + " Backup failed\n\n"
+			reportErr += icon.Error + " Files backup failed\n\n"
+			reportErr += "• *host:* `" + host + "`\n"
 			reportErr += "• *source:* `" + src + "`\n"
 			reportErr += "• *target:* `" + dst + "`\n"
+			reportErr += "• *time:* `" + time.Since(now).String() + "`\n"
 			reportErr += "• *error:* `" + err.Error() + "`\n"
-			reportErr += "• *time:* `" + time.Since(now).String() + "`"
+			reportErr += "• *log:* `" + logPath + "`\n"
 
 			if errors.Is(err, context.Canceled) {
 				break
@@ -56,15 +66,17 @@ func (r *RdiffBackup) BatchBackup(ctx context.Context, sources, exclude []string
 			continue
 		}
 
-		log.Printf("Backup succeed: src: %s; dst: %s", src, dst)
+		log.Printf("Files backup succeed: src: %s; dst: %s", src, dst)
 
 		if reportOk != "" {
 			reportOk += "\n\n"
 		}
-		reportOk += icon.Success + " Backup succeed\n\n"
+		reportOk += icon.Success + " Files backup succeed\n\n"
+		reportOk += "• *host:* `" + host + "`\n"
 		reportOk += "• *source:* `" + src + "`\n"
 		reportOk += "• *target:* `" + dst + "`\n"
-		reportOk += "• *time:* `" + time.Since(now).String() + "`"
+		reportOk += "• *time:* `" + time.Since(now).String() + "`\n"
+		reportOk += "• *log:* `" + logPath + "`\n"
 	}
 
 	report := ""

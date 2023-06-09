@@ -6,9 +6,24 @@ import (
 	"io"
 	"io/fs"
 	"log"
+	"os"
 	"os/exec"
+	"path"
 	"sync"
 )
+
+func AbsPath(p string) string {
+	if path.IsAbs(p) {
+		return p
+	}
+
+	wd, err := os.Getwd()
+	if err != nil {
+		return p
+	}
+
+	return path.Join(wd, p)
+}
 
 func StreamCommand(ctx context.Context, outW, errW io.Writer, name string, args []string) error {
 	c := exec.CommandContext(ctx, name, args...)

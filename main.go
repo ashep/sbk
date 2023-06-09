@@ -9,9 +9,11 @@ import (
 	"time"
 
 	"github.com/ashep/sbk/config"
+	"github.com/ashep/sbk/mysql"
 	"github.com/ashep/sbk/notifier"
 	"github.com/ashep/sbk/rdiffbackup"
 	"github.com/ashep/sbk/telegram"
+	"github.com/ashep/sbk/util"
 )
 
 func main() {
@@ -40,12 +42,17 @@ func main() {
 	}
 
 	ctx, ctxCancel := context.WithCancel(context.Background())
+	defer ctxCancel()
 
-	if len(cfg.Files.Sources) != 0 {
-		logFilename := path.Join(cfg.LogDir, time.Now().Format("20060102-150405-files.log"))
+	if cfg.Files != nil && len(cfg.Files.Sources) != 0 {
+		logFilename := util.AbsPath(path.Join(cfg.LogDir, time.Now().Format("20060102-150405-files.log")))
 		rb := rdiffbackup.New(cfg.Files.Verbosity, ntf)
 		rb.BatchBackup(ctx, cfg.Files.Sources, cfg.Files.Exclude, cfg.Files.Destination, logFilename)
 	}
 
-	ctxCancel()
+	if cfg.MySQL != nil && len(cfg.MySQL.Sources) != 0 {
+		logFilename := util.AbsPath(path.Join(cfg.LogDir, time.Now().Format("20060102-150405-mysql.log")))
+		ms := mysql.New(ntf)
+		ms.BatchBackup(ctx, cfg.MySQL.Sources, cfg.MySQL.Destination, logFilename)
+	}
 }

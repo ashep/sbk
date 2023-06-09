@@ -45,8 +45,8 @@ type Notifications struct {
 }
 
 type Config struct {
-	Files         Files         `yaml:"files" json:"files"`
-	MySQL         MySQL         `yaml:"mysql" json:"mysql"`
+	Files         *Files        `yaml:"files,omitempty" json:"files,omitempty"`
+	MySQL         *MySQL        `yaml:"mysql" json:"mysql"`
 	LogDir        string        `yaml:"logDir,omitempty" json:"logDir,omitempty"`
 	Notifications Notifications `yaml:"notifications,omitempty" json:"notifications,omitempty"`
 }
@@ -62,17 +62,13 @@ func ParseFromFile(name string) (Config, error) {
 		return Config{}, err
 	}
 
-	c := Config{Files: Files{
-		Verbosity: 5,
-	}}
+	c := Config{}
 	err = yaml.Unmarshal(b, &c)
 
 	cJSON, err := json.Marshal(c)
 	if err != nil {
 		return Config{}, err
 	}
-
-	fmt.Printf("%s\n", cJSON)
 
 	res, err := gojsonschema.Validate(
 		gojsonschema.NewStringLoader(schema),
