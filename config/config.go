@@ -47,7 +47,7 @@ type Notifications struct {
 type Config struct {
 	Files         *Files        `yaml:"files,omitempty" json:"files,omitempty"`
 	MySQL         *MySQL        `yaml:"mysql" json:"mysql"`
-	LogDir        string        `yaml:"logDir,omitempty" json:"logDir,omitempty"`
+	LogDir        string        `yaml:"log_dir,omitempty" json:"log_dir,omitempty"`
 	Notifications Notifications `yaml:"notifications,omitempty" json:"notifications,omitempty"`
 }
 

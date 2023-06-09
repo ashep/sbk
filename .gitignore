@@ -1,4 +1,5 @@
-/vendor
-/out
+/build
 /config.yaml
 /log
+/out
+/vendor

@@ -1,0 +1,23 @@
+mysql:
+  sources:
+    - host: "localhost"
+      port: 3306
+      user: "root"
+      password: "my-secret-pw"
+      database: "test"
+  destination: "/var/backup/mysql"
+
+files:
+  sources:
+    - "/home/alice/documents"
+    - "/home/bob/photo"
+    - "/var/backup/mysql"
+  destination: "user@backup.server.com:/var/backup"
+  exclude:
+    - "**/cache"
+  verbosity: 5
+
+notifications:
+  telegram:
+    token: "yourTelegramTokenyourTelegramTokenyourTelegra"
+    chat_id: "@youChannelName"

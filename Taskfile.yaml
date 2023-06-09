@@ -1,0 +1,26 @@
+  version: 3
+
+  tasks:
+    build.release.linux.amd64:
+      desc: Build release binary for Linux AMD64
+      env:
+        GOOS: linux
+        GOARCH: amd64
+      cmds:
+        - mkdir -p build
+        - go build -ldflags="-s -w" -o build/sbk-linux-amd64
+
+    build.release.windows.amd64:
+      desc: Build release binary for Linux AMD64
+      env:
+        GOOS: windows
+        GOARCH: amd64
+      cmds:
+        - mkdir -p build
+        - go build -ldflags="-s -w" -o build/sbk-windows-amd64.exe
+
+    build.release:
+      desc: Build release binaries
+      cmds:
+        - task: build.release.linux.amd64
+        - task: build.release.windows.amd64

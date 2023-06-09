@@ -87,7 +87,7 @@
         }
       }
     },
-    "logDir": {
+    "log_dir": {
       "description": "Path to the log directory",
       "type": "string",
       "minLength": 1,
