@@ -18,6 +18,7 @@ import (
 
 func main() {
 	cfgPath := flag.String("c", "config.yaml", "path to config file")
+	debug := flag.Bool("d", false, "enable debug mode")
 	flag.Parse()
 
 	cfg, err := config.ParseFromFile(*cfgPath)
@@ -47,12 +48,12 @@ func main() {
 	if cfg.MySQL != nil && len(cfg.MySQL.Sources) != 0 {
 		logFilename := util.AbsPath(path.Join(cfg.LogDir, time.Now().Format("20060102-150405-mysql.log")))
 		ms := mysql.New(ntf)
-		ms.BatchBackup(ctx, cfg.MySQL.Sources, cfg.MySQL.Destination, logFilename)
+		ms.BatchBackup(ctx, cfg.MySQL.Sources, cfg.MySQL.Destination, logFilename, *debug)
 	}
 
 	if cfg.Files != nil && len(cfg.Files.Sources) != 0 {
 		logFilename := util.AbsPath(path.Join(cfg.LogDir, time.Now().Format("20060102-150405-files.log")))
 		rb := rdiffbackup.New(cfg.Files.Verbosity, ntf)
-		rb.BatchBackup(ctx, cfg.Files.Sources, cfg.Files.Exclude, cfg.Files.Destination, logFilename)
+		rb.BatchBackup(ctx, cfg.Files.Sources, cfg.Files.Exclude, cfg.Files.Destination, logFilename, *debug)
 	}
 }

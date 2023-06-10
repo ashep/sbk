@@ -13,6 +13,11 @@ and [config.sample.yaml](config.sample.yaml) as a reference.
 
 ## Changelog
 
+### 23.06.10.2
+
+- Added debug mode.
+- Fixed logging.
+
 ### 23.06.10.1
 
 - Fixed `mysqldump` freezing.

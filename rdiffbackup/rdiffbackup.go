@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/ashep/sbk/icon"
@@ -26,7 +27,7 @@ func New(verbosity int, notifier notifier.Notifier) *RdiffBackup {
 	}
 }
 
-func (r *RdiffBackup) BatchBackup(ctx context.Context, sources, exclude []string, target, logPath string) {
+func (r *RdiffBackup) BatchBackup(ctx context.Context, sources, exclude []string, target, logPath string, debug bool) {
 	if len(sources) == 0 {
 		return
 	}
@@ -49,7 +50,7 @@ func (r *RdiffBackup) BatchBackup(ctx context.Context, sources, exclude []string
 
 		log.Print("Files backup started: " + logMsg)
 
-		if err := r.Backup(ctx, src, dst, logPath, exclude); err != nil {
+		if err := r.Backup(ctx, src, dst, logPath, exclude, debug); err != nil {
 			log.Printf("Files backup failed: %s; err: %s", logMsg, err)
 
 			if reportErr != "" {
@@ -72,9 +73,10 @@ func (r *RdiffBackup) BatchBackup(ctx context.Context, sources, exclude []string
 
 		log.Print("Files backup succeed: " + logMsg)
 
-		if reportOk != "" {
+		if reportOk != "" || reportErr != "" {
 			reportOk += "\n\n"
 		}
+
 		reportOk += icon.Success + " Files backup succeed\n\n"
 		reportOk += "• *host:* `" + host + "`\n"
 		reportOk += "• *source:* `" + src + "`\n"
@@ -83,20 +85,12 @@ func (r *RdiffBackup) BatchBackup(ctx context.Context, sources, exclude []string
 		reportOk += "• *log:* `" + logPath + "`\n"
 	}
 
-	report := ""
-	if reportErr != "" {
-		report += reportErr
-	}
-	if reportOk != "" {
-		report += reportOk
-	}
-
-	if err := r.notifier.Notify(report); err != nil {
+	if err := r.notifier.Notify(reportErr + reportOk); err != nil {
 		log.Printf("failed to send report: %s", err)
 	}
 }
 
-func (r *RdiffBackup) Backup(ctx context.Context, src, dst, logPath string, exclude []string) error {
+func (r *RdiffBackup) Backup(ctx context.Context, src, dst, logPath string, exclude []string, debug bool) error {
 	if err := os.MkdirAll(dst, 0o755); err != nil {
 		return err
 	}
@@ -116,6 +110,10 @@ func (r *RdiffBackup) Backup(ctx context.Context, src, dst, logPath string, excl
 
 	args = append(args, "-v", strconv.Itoa(r.verbosity))
 	args = append(args, src, dst)
+
+	if debug {
+		log.Printf("rdiff-backup %s", strings.Join(args, " "))
+	}
 
 	return util.StreamCommand(ctx, logF, logF, "rdiff-backup", args)
 }

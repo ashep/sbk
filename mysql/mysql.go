@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/ashep/sbk/config"
@@ -25,7 +26,7 @@ func New(notifier notifier.Notifier) *MySQL {
 	return &MySQL{ntf: notifier}
 }
 
-func (m *MySQL) BatchBackup(ctx context.Context, sources []config.DBSource, target, logPath string) {
+func (m *MySQL) BatchBackup(ctx context.Context, sources []config.DBSource, target, logPath string, debug bool) {
 	if len(sources) == 0 {
 		return
 	}
@@ -48,7 +49,7 @@ func (m *MySQL) BatchBackup(ctx context.Context, sources []config.DBSource, targ
 
 		log.Print("MySQL backup started: " + logMsg)
 
-		if err := m.Backup(ctx, src, dst, logPath); err != nil {
+		if err := m.Backup(ctx, src, dst, logPath, debug); err != nil {
 			log.Printf("MySQL backup failed: %s; err: %s", logMsg, err)
 
 			if reportErr != "" {
@@ -76,9 +77,10 @@ func (m *MySQL) BatchBackup(ctx context.Context, sources []config.DBSource, targ
 			sz = dstStat.Size()
 		}
 
-		if reportOk != "" {
+		if reportOk != "" || reportErr != "" {
 			reportOk += "\n\n"
 		}
+
 		reportOk += icon.Success + " MySQL backup succeed\n\n"
 		reportOk += "• *host:* `" + host + "`\n"
 		reportOk += "• *source:* `" + srcStr + "`\n"
@@ -88,20 +90,12 @@ func (m *MySQL) BatchBackup(ctx context.Context, sources []config.DBSource, targ
 		reportOk += "• *log:* `" + logPath + "`\n"
 	}
 
-	report := ""
-	if reportErr != "" {
-		report += reportErr
-	}
-	if reportOk != "" {
-		report += reportOk
-	}
-
-	if err := m.ntf.Notify(report); err != nil {
+	if err := m.ntf.Notify(reportErr + reportOk); err != nil {
 		log.Printf("failed to send report: %s", err)
 	}
 }
 
-func (m *MySQL) Backup(ctx context.Context, src config.DBSource, dst, logPath string) error {
+func (m *MySQL) Backup(ctx context.Context, src config.DBSource, dst, logPath string, debug bool) error {
 	dstDir := path.Dir(dst)
 	if err := os.MkdirAll(dstDir, 0o755); err != nil {
 		return err
@@ -125,6 +119,10 @@ func (m *MySQL) Backup(ctx context.Context, src config.DBSource, dst, logPath st
 	args = append(args, "--tz-utc")
 	args = append(args, "--skip-lock-tables")
 	args = append(args, src.Database)
+
+	if debug {
+		log.Printf("mysqldump %s", strings.Join(args, " "))
+	}
 
 	// TODO: don't discard stderr, write it to logPath
 	if err := util.StreamCommand(ctx, outF, io.Discard, "mysqldump", args); err != nil {
