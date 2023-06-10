@@ -17,6 +17,8 @@ files:
     - "**/cache"
   verbosity: 5
 
+log_dir: "/var/log/backup"
+
 notifications:
   telegram:
     token: "yourTelegramTokenyourTelegramTokenyourTelegra"

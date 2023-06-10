@@ -91,7 +91,7 @@
       "description": "Path to the log directory",
       "type": "string",
       "minLength": 1,
-      "default": "./log"
+      "default": "/var/log/backup"
     },
     "notifications": {
       "type": "object",

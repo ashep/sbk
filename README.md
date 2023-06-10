@@ -13,6 +13,13 @@ and [config.sample.yaml](config.sample.yaml) as a reference.
 
 ## Changelog
 
+### 23.06.10
+
+- Added `--skip-lock-tables` to `mysqldump` call.
+- Fixed order of phases: db first, then files.
+- Improved logging.
+- Default `log_dir` path set to `/var/log/backup`
+
 ### 23.06.09.1
 
 Fix Telegram token length validation.

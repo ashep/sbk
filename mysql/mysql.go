@@ -44,9 +44,12 @@ func (m *MySQL) BatchBackup(ctx context.Context, sources []config.DBSource, targ
 		dst := util.AbsPath(target + "/" + src.Database + ".sql")
 		now := time.Now()
 		srcStr := fmt.Sprintf("%s:%d/%s", src.Host, src.Port, src.Database)
+		logMsg := fmt.Sprintf("src: %s; dst: %s", srcStr, dst)
+
+		log.Print("MySQL backup started: " + logMsg)
 
 		if err := m.Backup(ctx, src, dst, logPath); err != nil {
-			log.Printf("MySQL backup failed: src: %s; dst: %s; err: %s", srcStr, dst, err)
+			log.Printf("MySQL backup failed: %s; err: %s", logMsg, err)
 
 			if reportErr != "" {
 				reportErr += "\n\n"
@@ -66,7 +69,7 @@ func (m *MySQL) BatchBackup(ctx context.Context, sources []config.DBSource, targ
 			continue
 		}
 
-		log.Printf("MySQL backup succeed: src: %s; dst: %s", srcStr, dst)
+		log.Print("MySQL backup succeed: " + logMsg)
 
 		if reportOk != "" {
 			reportOk += "\n\n"
@@ -114,6 +117,7 @@ func (m *MySQL) Backup(ctx context.Context, src config.DBSource, dst, logPath st
 	args = append(args, "--protocol", "tcp")
 	args = append(args, "--log-error", logPath)
 	args = append(args, "--tz-utc")
+	args = append(args, "--skip-lock-tables")
 	args = append(args, src.Database)
 
 	mdErr := util.StreamCommand(ctx, outF, io.Discard, "mysqldump", args)
@@ -126,6 +130,6 @@ func (m *MySQL) Backup(ctx context.Context, src config.DBSource, dst, logPath st
 		_ = os.Remove(logPath)
 	}
 
-	// TODO: write stderr to logPath
+	// TODO: don't discard stderr, write it to logPath
 	return util.StreamCommand(ctx, io.Discard, io.Discard, "gzip", []string{"-9", "-f", dst})
 }

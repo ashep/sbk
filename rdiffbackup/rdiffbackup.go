@@ -3,6 +3,7 @@ package rdiffbackup
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -44,9 +45,12 @@ func (r *RdiffBackup) BatchBackup(ctx context.Context, sources, exclude []string
 		src = util.AbsPath(src)
 		dst := target + "/" + src
 		now := time.Now()
+		logMsg := fmt.Sprintf("src: %s; dst: %s", src, dst)
+
+		log.Print("Files backup started: " + logMsg)
 
 		if err := r.Backup(ctx, src, dst, logPath, exclude); err != nil {
-			log.Printf("Files backup failed: src: %s; dst: %s; err: %s", src, dst, err)
+			log.Printf("Files backup failed: %s; err: %s", logMsg, err)
 
 			if reportErr != "" {
 				reportErr += "\n\n"
@@ -66,7 +70,7 @@ func (r *RdiffBackup) BatchBackup(ctx context.Context, sources, exclude []string
 			continue
 		}
 
-		log.Printf("Files backup succeed: src: %s; dst: %s", src, dst)
+		log.Print("Files backup succeed: " + logMsg)
 
 		if reportOk != "" {
 			reportOk += "\n\n"
