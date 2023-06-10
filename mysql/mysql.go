@@ -42,7 +42,7 @@ func (m *MySQL) BatchBackup(ctx context.Context, sources []config.DBSource, targ
 		}
 
 		dst := util.AbsPath(target + "/" + src.Database + ".sql")
-		now := time.Now()
+		startAt := time.Now()
 		srcStr := fmt.Sprintf("%s:%d/%s", src.Host, src.Port, src.Database)
 		logMsg := fmt.Sprintf("src: %s; dst: %s", srcStr, dst)
 
@@ -58,7 +58,7 @@ func (m *MySQL) BatchBackup(ctx context.Context, sources []config.DBSource, targ
 			reportErr += "• *host:* `" + host + "`\n"
 			reportErr += "• *source:* `" + srcStr + "`\n"
 			reportErr += "• *target:* `" + dst + ".gz`\n"
-			reportErr += "• *time:* `" + time.Since(now).String() + "`\n"
+			reportErr += "• *time:* `" + time.Since(startAt).Round(time.Second).String() + "`\n"
 			reportErr += "• *error:* `" + err.Error() + "`\n"
 			reportErr += "• *log:* `" + logPath + "`\n"
 
@@ -71,6 +71,11 @@ func (m *MySQL) BatchBackup(ctx context.Context, sources []config.DBSource, targ
 
 		log.Print("MySQL backup succeed: " + logMsg)
 
+		sz := int64(0)
+		if dstStat, err := os.Stat(dst + ".gz"); err == nil {
+			sz = dstStat.Size()
+		}
+
 		if reportOk != "" {
 			reportOk += "\n\n"
 		}
@@ -78,7 +83,8 @@ func (m *MySQL) BatchBackup(ctx context.Context, sources []config.DBSource, targ
 		reportOk += "• *host:* `" + host + "`\n"
 		reportOk += "• *source:* `" + srcStr + "`\n"
 		reportOk += "• *target:* `" + dst + ".gz`\n"
-		reportOk += "• *time:* `" + time.Since(now).String() + "`\n"
+		reportOk += "• *size:* `" + strconv.FormatInt(sz/1024/1024, 10) + "Mb`\n"
+		reportOk += "• *time:* `" + time.Since(startAt).Round(time.Second).String() + "`\n"
 		reportOk += "• *log:* `" + logPath + "`\n"
 	}
 
@@ -120,16 +126,19 @@ func (m *MySQL) Backup(ctx context.Context, src config.DBSource, dst, logPath st
 	args = append(args, "--skip-lock-tables")
 	args = append(args, src.Database)
 
-	mdErr := util.StreamCommand(ctx, outF, io.Discard, "mysqldump", args)
-	logStat, err := os.Stat(logPath)
-	if mdErr != nil {
-		return mdErr
+	// TODO: don't discard stderr, write it to logPath
+	if err := util.StreamCommand(ctx, outF, io.Discard, "mysqldump", args); err != nil {
+		return err
 	}
 
-	if err == nil && logStat.Size() == 0 {
+	if logStat, err := os.Stat(logPath); err == nil && logStat.Size() == 0 {
 		_ = os.Remove(logPath)
 	}
 
 	// TODO: don't discard stderr, write it to logPath
-	return util.StreamCommand(ctx, io.Discard, io.Discard, "gzip", []string{"-9", "-f", dst})
+	if err := util.StreamCommand(ctx, io.Discard, io.Discard, "gzip", []string{"-9", "-f", dst}); err != nil {
+		return err
+	}
+
+	return err
 }

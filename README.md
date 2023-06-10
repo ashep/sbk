@@ -13,6 +13,12 @@ and [config.sample.yaml](config.sample.yaml) as a reference.
 
 ## Changelog
 
+### 23.06.10.1
+
+- Fixed `mysqldump` freezing.
+- Added time rounding in reports.
+- Added MySQL dump size to report.
+
 ### 23.06.10
 
 - Added `--skip-lock-tables` to `mysqldump` call.

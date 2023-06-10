@@ -58,27 +58,37 @@ func Stream(ctx context.Context, wg *sync.WaitGroup, outW, errW io.Writer, inR, 
 	buf := make([]byte, 64<<10) // 64 Kb
 	defer wg.Done()
 
+	inStreamClosed, errStreamClosed := false, false
+
 	for {
 		select {
 		case <-ctx.Done():
 			return
+
 		default:
-			err := flush(inR, outW, buf)
-			if err != nil {
-				if !(err == io.EOF || errors.Is(err, fs.ErrClosed)) {
-					log.Print(err)
-				}
+			if inStreamClosed && errStreamClosed {
 				return
 			}
 
-			err = flush(errR, errW, buf)
-			if err != nil {
-				if !(err == io.EOF || errors.Is(err, fs.ErrClosed)) {
-					log.Print(err)
+			if !inStreamClosed {
+				err := flush(inR, outW, buf)
+				if err != nil && err == io.EOF || errors.Is(err, fs.ErrClosed) {
+					inStreamClosed = true
+				} else if err != nil {
+					log.Printf("failed to flush input stream: %s", err)
+					return
 				}
-				return
 			}
 
+			if !errStreamClosed {
+				err := flush(errR, errW, buf)
+				if err != nil && err == io.EOF || errors.Is(err, fs.ErrClosed) {
+					errStreamClosed = true
+				} else if err != nil {
+					log.Printf("failed to flush error stream: %s", err)
+					return
+				}
+			}
 		}
 	}
 }

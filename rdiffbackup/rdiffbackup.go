@@ -43,8 +43,8 @@ func (r *RdiffBackup) BatchBackup(ctx context.Context, sources, exclude []string
 		}
 
 		src = util.AbsPath(src)
-		dst := target + "/" + src
-		now := time.Now()
+		dst := target + src
+		startAt := time.Now()
 		logMsg := fmt.Sprintf("src: %s; dst: %s", src, dst)
 
 		log.Print("Files backup started: " + logMsg)
@@ -59,7 +59,7 @@ func (r *RdiffBackup) BatchBackup(ctx context.Context, sources, exclude []string
 			reportErr += "• *host:* `" + host + "`\n"
 			reportErr += "• *source:* `" + src + "`\n"
 			reportErr += "• *target:* `" + dst + "`\n"
-			reportErr += "• *time:* `" + time.Since(now).String() + "`\n"
+			reportErr += "• *time:* `" + time.Since(startAt).Round(time.Second).String() + "`\n"
 			reportErr += "• *error:* `" + err.Error() + "`\n"
 			reportErr += "• *log:* `" + logPath + "`\n"
 
@@ -79,7 +79,7 @@ func (r *RdiffBackup) BatchBackup(ctx context.Context, sources, exclude []string
 		reportOk += "• *host:* `" + host + "`\n"
 		reportOk += "• *source:* `" + src + "`\n"
 		reportOk += "• *target:* `" + dst + "`\n"
-		reportOk += "• *time:* `" + time.Since(now).String() + "`\n"
+		reportOk += "• *time:* `" + time.Since(startAt).Round(time.Second).String() + "`\n"
 		reportOk += "• *log:* `" + logPath + "`\n"
 	}
 
