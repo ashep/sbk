@@ -28,6 +28,7 @@ type DBSource struct {
 	User     string `yaml:"user" json:"user"`
 	Password string `yaml:"password" json:"password"`
 	Database string `yaml:"database" json:"database"`
+	Filename string `yaml:"filename" json:"filename"`
 }
 
 type MySQL struct {

@@ -42,7 +42,16 @@ func (m *MySQL) BatchBackup(ctx context.Context, sources []config.DBSource, targ
 		default:
 		}
 
-		dst := util.AbsPath(target + "/" + src.Database + ".sql")
+		filename := src.Database
+		if src.Filename != "" {
+			filename = src.Filename
+		}
+
+		if !strings.HasSuffix(strings.ToLower(src.Filename), ".sql") {
+			filename += ".sql"
+		}
+
+		dst := util.AbsPath(target + "/" + filename)
 		startAt := time.Now()
 		srcStr := fmt.Sprintf("%s:%d/%s", src.Host, src.Port, src.Database)
 		logMsg := fmt.Sprintf("src: %s; dst: %s", srcStr, dst)
@@ -70,7 +79,7 @@ func (m *MySQL) BatchBackup(ctx context.Context, sources []config.DBSource, targ
 			continue
 		}
 
-		log.Print("MySQL backup succeed: " + logMsg)
+		log.Print("MySQL backup succeeded: " + logMsg)
 
 		sz := int64(0)
 		if dstStat, err := os.Stat(dst + ".gz"); err == nil {
@@ -81,7 +90,7 @@ func (m *MySQL) BatchBackup(ctx context.Context, sources []config.DBSource, targ
 			reportOk += "\n\n"
 		}
 
-		reportOk += icon.Success + " MySQL backup succeed\n\n"
+		reportOk += icon.Success + " MySQL backup succeeded\n\n"
 		reportOk += "• *host:* `" + host + "`\n"
 		reportOk += "• *source:* `" + srcStr + "`\n"
 		reportOk += "• *target:* `" + dst + ".gz`\n"
@@ -91,7 +100,7 @@ func (m *MySQL) BatchBackup(ctx context.Context, sources []config.DBSource, targ
 	}
 
 	if err := m.ntf.Notify(reportErr + reportOk); err != nil {
-		log.Printf("failed to send report: %s", err)
+		log.Printf("failed to send a report: %s", err)
 	}
 }
 

@@ -48,15 +48,15 @@ func (r *RdiffBackup) BatchBackup(ctx context.Context, sources, exclude []string
 		startAt := time.Now()
 		logMsg := fmt.Sprintf("src: %s; dst: %s", src, dst)
 
-		log.Print("Files backup started: " + logMsg)
+		log.Print("File backup started: " + logMsg)
 
 		if err := r.Backup(ctx, src, dst, logPath, exclude, debug); err != nil {
-			log.Printf("Files backup failed: %s; err: %s", logMsg, err)
+			log.Printf("File backup failed: %s; err: %s", logMsg, err)
 
 			if reportErr != "" {
 				reportErr += "\n\n"
 			}
-			reportErr += icon.Error + " Files backup failed\n\n"
+			reportErr += icon.Error + " File backup failed\n\n"
 			reportErr += "• *host:* `" + host + "`\n"
 			reportErr += "• *source:* `" + src + "`\n"
 			reportErr += "• *target:* `" + dst + "`\n"
@@ -71,13 +71,13 @@ func (r *RdiffBackup) BatchBackup(ctx context.Context, sources, exclude []string
 			continue
 		}
 
-		log.Print("Files backup succeed: " + logMsg)
+		log.Print("File backup succeeded: " + logMsg)
 
 		if reportOk != "" || reportErr != "" {
 			reportOk += "\n\n"
 		}
 
-		reportOk += icon.Success + " Files backup succeed\n\n"
+		reportOk += icon.Success + " File backup succeeded\n\n"
 		reportOk += "• *host:* `" + host + "`\n"
 		reportOk += "• *source:* `" + src + "`\n"
 		reportOk += "• *target:* `" + dst + "`\n"
@@ -86,7 +86,7 @@ func (r *RdiffBackup) BatchBackup(ctx context.Context, sources, exclude []string
 	}
 
 	if err := r.notifier.Notify(reportErr + reportOk); err != nil {
-		log.Printf("failed to send report: %s", err)
+		log.Printf("failed to send a report: %s", err)
 	}
 }
 

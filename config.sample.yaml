@@ -1,18 +1,27 @@
 mysql:
+  destination: "/var/backup/mysql"
   sources:
-    - host: "localhost"
+    - host: "mary.example.com"
       port: 3306
       user: "root"
-      password: "my-secret-pw"
-      database: "test"
-  destination: "/var/backup/mysql"
+      password: "root-secret-pw"
+      database: "wordpress"
+      filename: "mary-wordpress.sql"
+      gzip: false
+    - host: "john.example.com"
+      port: 3306
+      user: "john"
+      password: "john-secret-pw"
+      database: "drupal"
+      filename: "john-drupal" # filename extension is optional
+      gzip: true
 
 files:
+  destination: "user@backup.server.com:/var/backup"
   sources:
     - "/home/alice/documents"
     - "/home/bob/photo"
     - "/var/backup/mysql"
-  destination: "user@backup.server.com:/var/backup"
   exclude:
     - "**/cache"
   verbosity: 5

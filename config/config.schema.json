@@ -8,7 +8,7 @@
       "required": ["sources", "destination"],
       "properties": {
         "sources": {
-          "description": "List of sources to backup, in rdiff-backup format",
+          "description": "List of sources to back up in rdiff-backup format",
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
@@ -18,12 +18,12 @@
           }
         },
         "destination": {
-          "description": "Backup destination, in rdiff-backup format",
+          "description": "Backup destination in rdiff-backup format",
           "type": "string",
           "minLength": 1
         },
         "exclude": {
-          "description": "Exclude rules, in rdiff-backup format",
+          "description": "Exclude rules in rdiff-backup format",
           "type": "array",
           "uniqueItems": true,
           "items": {
@@ -44,7 +44,7 @@
       "required": ["sources", "destination"],
       "properties": {
         "sources": {
-          "description": "List of databases to backup",
+          "description": "List of databases to back up",
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
@@ -70,6 +70,10 @@
                 "minLength": 1
               },
               "database": {
+                "type": "string",
+                "minLength": 1
+              },
+              "filename": {
                 "type": "string",
                 "minLength": 1
               },
