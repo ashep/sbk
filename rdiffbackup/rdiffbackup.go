@@ -91,10 +91,6 @@ func (r *RdiffBackup) BatchBackup(ctx context.Context, sources, exclude []string
 }
 
 func (r *RdiffBackup) Backup(ctx context.Context, src, dst, logPath string, exclude []string, debug bool) error {
-	if err := os.MkdirAll(dst, 0o755); err != nil {
-		return err
-	}
-
 	logF, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
 		return err

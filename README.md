@@ -13,6 +13,10 @@ and [config.sample.yaml](config.sample.yaml) as a reference.
 
 ## Changelog
 
+### 0.3.0
+
+- Automatic target directory creation removed.
+
 ### 0.2.0
 
 - `mysql.sources.filename` config option added.
