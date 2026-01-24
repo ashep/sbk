@@ -1,6 +1,6 @@
 module github.com/ashep/sbk
 
-go 1.22
+go 1.25
 
 require (
 	github.com/xeipuuv/gojsonschema v1.2.0
