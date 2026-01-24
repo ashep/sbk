@@ -13,9 +13,13 @@ and [config.sample.yaml](config.sample.yaml) as a reference.
 
 ## Changelog
 
+### 0.3.1
+
+Go 1.25.
+
 ### 0.3.0
 
-- Automatic target directory creation removed.
+Automatic target directory creation removed.
 
 ### 0.2.0
 
